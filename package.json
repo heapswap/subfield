@@ -7,9 +7,7 @@
     "start": "astro dev",
     "build": "astro check && astro build",
     "preview": "astro preview",
-    "astro": "astro",
-    "pages": "wrangler pages dev --compatibility-date=2023-12-18 -- astro dev",
-    "deploy": "astro build && wrangler pages deploy ./dist"
+    "astro": "astro"
   },
   "dependencies": {
     "@astrojs/check": "^0.7.0",
@@ -25,6 +23,5 @@
     "typescript": "^5.5.2"
   },
   "devDependencies": {
-    "wrangler": "^3.61.0"
   }
 }
