@@ -1,9 +1,5 @@
 ---
-interface Props {
-	title: string;
-}
-
-const { title } = Astro.props;
+const { frontmatter } = Astro.props;
 ---
 
 <!doctype html>
@@ -12,15 +8,20 @@ const { title } = Astro.props;
 		<meta charset="UTF-8" />
 		<meta name="description" content="Astro description" />
 		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.png" />
 		<meta name="generator" content={Astro.generator} />
-		<title>{title}</title>
+		<title>{frontmatter.title}</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
 	</head>
-	<body>
+	<body class="
+
+	">
 		<slot />
 	</body>
 </html>
-<style is:global>
+<!--<style is:global>
 	:root {
 		--accent: 136, 58, 234;
 		--accent-light: 224, 204, 250;
@@ -48,4 +49,96 @@ const { title } = Astro.props;
 			Courier New,
 			monospace;
 	}
-</style>
+</style>-->
+<style is:global>
+	body { 
+	  @apply bg-stone-100 text-black  max-w-xl mx-auto px-6 text-center; 
+	}
+	
+	h1 {
+	  @apply text-3xl font-bold mx-auto text-emerald-700 text-center m-4 mt-6; 
+	}
+	
+	h2 {
+	  @apply text-2xl font-bold mx-auto mt-6  text-emerald-700 text-center; 
+	} 
+	
+	h3 {
+	  @apply text-xl mx-auto ml-2 mt-4 text-emerald-700 text-center; 
+	}
+	
+	h4 {
+	  @apply text-center; 
+	}
+	
+
+	p {
+	  @apply mx-auto my-2 ;     
+	}
+	
+	  .quote {
+	  @apply block mx-auto text-center italic mt-6;
+	  }
+  
+	  .quote-author {
+	  @apply block mx-auto text-center mb-6; 
+	  } 
+	
+	ul, ol {
+	@apply text-left list-inside;
+	}
+
+	ul li, ol li {
+	@apply text-left;
+	}
+	  
+	ul li:before{
+	content: '- ';
+	}
+	
+	ul li {
+	  @apply mb-1;  
+	}
+	
+	ul {
+	  @apply mx-auto px-6;  
+	}
+	
+	ol {
+	list-style-type: decimal;
+	@apply mx-auto px-6;  
+	}
+	
+	
+	a {
+	  @apply text-emerald-600;  
+	}
+  
+	a:hover {
+	  @apply text-emerald-800;
+	}
+	
+	a:visited {
+	  @apply text-emerald-700; 
+	}
+	  
+	code {
+	  @apply px-1 bg-stone-300 rounded-md;
+	}
+	
+	ul li::before {
+  content: ''; /* Solid circle bullet point */
+  color: black; /* Bullet point color */
+  font-weight: bold; /* Makes the bullet point solid */
+  /*display: inline-block; /* Keeps the bullet inline with the text */
+  /*margin-right: 8px; /* Space between the bullet and the text */
+  /* margin-left: -20px; /* Adjust as needed to align with your list */
+}
+
+ul {
+  list-style-type: none; 
+  /*padding-left: 0; */
+}
+	
+	
+  </style>

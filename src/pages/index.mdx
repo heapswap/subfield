@@ -1,0 +1,135 @@
+---
+layout: ../layouts/Layout.astro
+title: Subfield
+---
+
+# 🌿 Subfield 🌿
+
+**Subfield is a protocol for decentralized applications.**
+
+
+#### 🌾 [Why](#-why-) 🌾
+#### ☘️ [Schema](#️-schema-) ☘️
+#### 🌹 [Entries](#-entries-) 🌹
+#### 🍀 [Routing](#-routing-) 🍀
+#### 🪴 [Examples](#-examples-) 🪴
+#### 🌻 [Future](#-future-) 🌻
+
+
+## 🌾 Why 🌾
+
+**Compromise is the little-death that brings total obliteration.**
+
+- Federation is an unsustainable middle-ground between centralization and decentralization. Exchanging a king for a less powerful feudal lord is not a long-term solution, as people in charge of others will always have pressures and incentives that are not necessarily aligned with their dependents' best interests.
+
+## ☘️ Schema ☘️
+
+- Servers have two endpoints:
+  - `/:signer/:cosigner/:tangent`
+    - This REST endpoint can be used to `POST/GET/DELETE` entries without requiring a websocket connection.
+      - `POST` requires all 3 parameters and signature from the signer.
+      - `GET` requires any combination of 1-3 of the parameters, with non-provided parameters being a wildcard (underscore) and returning paginated results.
+      - `DELETE` requires all 3 parameters and a signature from either the signer or cosigner. 
+    - Path Parameters: _(Encoded as 52-character base32 strings)_
+      - `signer`
+        - the write key (ed25519 public key of the publisher)
+      - `cosigner`
+        - the read key (ed25519 public key of the recipient)
+      - `tangent`
+        - this is completely arbitrary and could be:
+        - \- a topic (the blake3 hash of the topic's name)
+        - \- a nonce (a random 32-byte string, equivalent to an obfuscated topic)
+        - \- another key (this is currently meaningless in the spec, but could have an emergent use case)
+    - Query: (All query parameters are optional and used for pagination)
+      - `limit` (number, default 1)
+        - return up to *n* entries
+      - `after` (hash, default null)
+        - return entries created after this hash
+      - `before` (hash, default null)
+        - return entries created before this hash
+      - `ascending` (boolean, default false)
+        - return entries in ascending order
+             
+  - `/ws`
+    - The websocket endpoint is required for pubsub actions, and behaves similarly to the REST endpoint. Messages are objects with the following properties:
+      - `id` - A random id used to track responses to requests
+      - `action` - `POST|GET|DELETE|RESPONSE` or `SUBSCRIBE|UNSUBSCRIBE|MESSAGE`
+      - `path` - `/:signer/:cosigner/:tangent`
+      - `data` - (for `POST`, `RESPONSE`, and `MESSAGE`)
+
+## 🌹 Entries 🌹
+
+Entries are rows in the nodes' local Sqlite databases, and have the following properties:
+
+- public metadata:
+  - the signature of the signer
+  - the signature of the cosigner (optional, sometimes provided after instantiation)
+  - whether it is public or private (boolean)
+  - the created and updated timestamp (unix time)
+  - the nonce used to encrypt the rest of the entry (optional)
+- optionally encrypted data (depending on the public/private boolean):
+  - the plaintext of the topic name (since the tangent could be totally random or salted to obfuscate the topic, max 1kb)
+  - the datatype (u32 - values under 1000 are reserved for the protocol, such as pointers, and anything else is user-defined, such as user profiles, posts, comments, etc.)
+  - the data (max 1mb)
+
+## 🍀 Routing 🍀
+
+- Data is replicated 3 times in the network, and each replica is stored on the node closest to each of the three parameters. 
+  - Queries with wildcards return the latest created entries, and use keyset pagination. 
+  - Searches by two query parameters prefer searching by signer and/or cosigner instead of tangent.
+  - If a query knows all 3 parameters, the requester can send out 3 simultaneous requests, in order to resolve it quickly.
+
+- Data is not guaranteed to exist forever on the network - nodes treat data as a LRU cache, and will delete old data when they run out of space. In order to keep data alive, clients should store their data locally and occasionally request or reupload it.
+
+- For example, `#like` might be a frequent topic, so whatever node is in charge of it will only be able to keep the most recent entries alive. This is fine, because the purpose of the network is to provide a cache to bridge the gap between peers that are online asynchronously, not store data forever.
+
+- Due to the fact that websockets on https sites require wss, browsers will need to use a gateway url, similar to how IPFS gateways work.
+
+- This spec does not currently provide anonymity, as there are no "hops" between nodes. It may be implemented as an option in the future, depending on the needs of the applications that use it.
+
+## 🪴 Examples 🪴
+
+- The following are examples of how the protocol could be used to implement features of a social network. These mechanisms are not strictly defined, and implementers are encouraged to experiment with different ways of building their applications:
+- *For readability, keys are prefixed with a colon (`:alice`) and hashes are prefixed with a hashtag (`#profile`).* 
+
+- Profile:
+  - `:alice/:alice/#profile` : Get Alice's profile
+
+- Friendship:
+  - `:alice/:bob/#friend` : Get the status of Alice's friendship towards Bob
+  - `:alice/:bob/_` : Get all keys that Alice has addressed to Bob
+  - `:alice/_/#friend` : Get friendships from Alice
+  - `_/:bob/#friend` : Get friendships towards Bob
+  - `:bob/_/_` : Get latest activity from Bob
+  - `_/:bob/_` : Get latest activity towards Bob
+  - `_/_/#friend` : Get latest friendships on the whole network
+
+- Creating a post:
+  - First, Alice would create two ephemeral keypairs for the post (one each for reading and writing). 
+    - *If the post is public, she would only need one keypair, since the read key would not be shared with anyone.*
+  - `:post/:post/#cats` : Then, she would publish the post, maybe to the topic `#cats`. If the post is private, she will need to distribute the read key to the intended audience.
+  - `:alice/:post/#post` : If Alice wants the post to be tied to her identity, she can signify ownership by publishing and cosigning an entry with both her key and the post's key, to prove that she holds both keys.
+- Commenting on a post:
+  - First Bob would create an ephemeral keypair for the comment.
+  - `:comment/:post/#comment` : Then, he would add the comment to the post. 
+    - If Alice likes the comment, she could cosign it. If she dislikes it, she could delete it, since `DELETE` requests can be authorized by either the signer or cosigner.
+  - `:bob/:comment/#comment` : If Bob wants the comment to be tied to his identity, he can create an entry signed by both his key and the comment's key.
+  
+- Creating a pointer:
+  - `:pointer/:pointer/#pointer` : Create a pointer to a post, comment, or other entry. These keys and hash can really be anything, as the action of being a pointer is defined in the (optionally encrypted) datatype, not the schema. 
+  - Pointers may be used if the write or read key for an entry may need to be swapped out later. Although Subfield does not use content-addressing, read and write data is still encoded in the path, so users may need to insulate data from future ownership changes.
+
+- Managing a group:
+  - `:group/:group/#group` : Get the group's metadata
+  - `:group/_/#epoch` : Get the latest decryption epochs
+  - `:epoch/:alice/#key` : Get Alice's decryption key for an epoch
+  - `_/:group/#message` : Get the latest messages in the group, as users would create a new keypair for each message this would be a way to get the latest messages from all users in the group. This is similar to how posts and comments work, but would likely not be published to their account like a post would.
+  - _Many problems for platforms, such as private profiles require groups, so a more efficient tree-based (non O(n)) group key-management system like [OpenMLS](https://openmls.tech) may be implemented in the future. Currently, OpenMLS requires storing a history of join messages, which does not fit well with the Subfield model of a semi-ephemeral cache._
+
+## 🌻 Future 🌻 
+
+- Due to the lack of identity-based authentication, it is expected that spam would be a problem, an unfortunate side-effect of decentralization. Applications will have to implement their own spam filters, which will most likely look like web-of-trust setups, but nodes may have heuristics and rate limits to help with this.
+
+- Nodes will also be able to subscribe to 'nukelists' which are lists of public keys that can request nodes to delete entries. While this is technically a form of censorship, it is a necessary evil due to the fact that entries are not necessarily encrypted. This is not unprecedented, as decentralized systems like Storj have similar mechanisms.
+
+# 🌿 Subfield 🌿
