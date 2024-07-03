@@ -4,9 +4,9 @@ title: Subfield
 ---
 
 <a name="subfield"></a>
-# 🌿 Subfield 🌿
+# 🌿 [Subfield](https://github.com/heapswap/subfield) 🌿
 
-**Subfield is a protocol for decentralized applications.**
+*A grassroot-level protocol for growing applications.*
 
 #### 🌾 [Why](#why) 🌾
 #### ☘️ [Schema](#️schema) ☘️
@@ -30,9 +30,10 @@ title: Subfield
 - `/:signer/:cosigner/:tangent`
   - This REST endpoint can be used to `POST/GET/DELETE` entries without requiring a websocket connection.
     - `POST` requires all 3 parameters and a signature from the signer.
-    - `GET` requires any combination of 1-3 of the parameters, with non-provided parameters being a wildcard (underscore) and returning paginated results.
+    - `GET` requires any combination of 1-3 of the parameters, with underscores being a wildcard, and returns paginated results.
     - `DELETE` requires all 3 parameters and a signature from either the signer or cosigner. 
-  - Path Parameters: *(Encoded as base32 strings)*
+  - Path Parameters: 
+    - *(Keys and Hashes are encoded as lowercase RFC4648 Base32 strings)*
     - `signer`
       - the write key *(ed25519 public key of the publisher)*
     - `cosigner`
@@ -93,7 +94,7 @@ title: Subfield
 <a name="examples"></a>
 ## 🪴 [Examples](#subfield) 🪴
 
-- The following are examples of how the protocol could be used to implement features of a social network. These mechanisms are not strictly defined, and implementers are encouraged to experiment with different ways of building their applications.
+- The following are examples of how the protocol could be used to implement features of a social network. These mechanisms are not strictly defined, and implementers are encouraged to experiment with different ways of building their applications. All paths can either be used with the REST or websocket endpoints, depending on whether the application needs real-time updates.
 - *For readability, keys are prefixed with a colon (`:alice`) and hashes are prefixed with a hashtag (`#profile`).* 
 
 - Profile:
@@ -126,11 +127,12 @@ title: Subfield
   - Pointers may be used if the write or read key for an entry may need to be swapped out later. Although Subfield does not use content-addressing, read and write data is still encoded in the path, so users may need to insulate data from future ownership changes.
 
 - Managing a group:
+  - _Many problems for platforms, such as private profiles require groups, so a more efficient tree-based (non O(n)) group key-management system like [OpenMLS](https://openmls.tech) may be implemented in the future. Currently, OpenMLS requires storing a history of join messages, which does not fit well with the Subfield model of a semi-ephemeral cache.
   - `:group/:group/#group` : Get the group's metadata
   - `:group/_/#epoch` : Get the latest decryption epochs
   - `:epoch/:alice/#key` : Get Alice's decryption key for an epoch
-  - `_/:group/#message` : Get the latest messages in the group, as users would create a new keypair for each message this would be a way to get the latest messages from all users in the group. This is similar to how posts and comments work, but would likely not be published to their account like a post would.
-  - _Many problems for platforms, such as private profiles require groups, so a more efficient tree-based (non O(n)) group key-management system like [OpenMLS](https://openmls.tech) may be implemented in the future. Currently, OpenMLS requires storing a history of join messages, which does not fit well with the Subfield model of a semi-ephemeral cache._
+  - `_/:group/#message` : Get the latest messages in the group. Users would create a new keypair for each message, which is similar to how posts and comments work, but messages would likely not be published to users' accounts like a post would.
+
 
 <a name="future"></a>
 ## 🌻 [Future](#subfield) 🌻 
@@ -144,3 +146,7 @@ title: Subfield
 - Eventually, it is a goal to implement higher-level features, such as a way to cache static content, upload logic as wasm binaries, or have more detailed search indexes, depending on the needs of the applications that use it.
 
 # 🌿 [Subfield](#subfield) 🌿
+
+Github: [@heapswap/subfield](https://github.com/heapswap/subfield)
+
+Author: [@kahnpoint](https://github.com/kahnpoint)
