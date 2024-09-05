@@ -71,8 +71,8 @@ const keypair = sf.Keypair.random(): Keypair
 const keypair = await sf.Keypair.vanity(prefix: string): Keypair 
 	// Prefix must be valid base32, or will throw an error
 	// Vanity Keypair search times (single-threaded):
-	// On average, requires 2^(letters * 5 - 1) address generations
-	// Each added letter increases generations by 32x
+	// On average, requires 2^(letters * 5 - 1) address generations,
+	// so each added letter increases average generations by 32x
 	// 1 character  ~0s  (2^4  generations)
 	// 2 characters ~1s  (2^9  generations)
 	// 3 characters ~1m  (2^14 generations) 
@@ -116,7 +116,10 @@ let message2 = responder.handshakeStep2(message1)
 // step 3 : initiator processes message2
 initiator.handshakeStep3(message2)
 
+// Setup done!
+
 // Usage
+
 const helloMessage: Uint8Array = sf.fromString("hello")
 
 // initiator -> responder
