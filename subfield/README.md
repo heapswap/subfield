@@ -11,7 +11,8 @@ npm install subfield
 # Usage
 
 ```typescript
-import * as sf from "subfield"
+import * as sf from "subfield/web" // for web
+import * as sf from "subfield/node" // for node
 
 await sf.init() // Initialize the WASM module, only necessary if the environment does not support top-level await
 ```

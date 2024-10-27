@@ -1,8 +1,8 @@
-import init, * as sf from "./pkg"
-export * from "./pkg"
+import init, * as sf from "./pkg-node"
+export * from "./pkg-node"
 
 // initialize the wasm module
-await init()
+// await init()
 
 // string encoding
 const encoder = new TextEncoder()

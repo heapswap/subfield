@@ -22,7 +22,19 @@
 	  // Some stricter flags (disabled by default)
 	  "noUnusedLocals": false,
 	  "noUnusedParameters": false,
-	  "noPropertyAccessFromIndexSignature": false
-	}
+	  "noPropertyAccessFromIndexSignature": false,
+
+	},
+	"typesVersions": {
+		"*": {
+		  "node": [
+			"./index-node.ts"
+		  ],
+		  "web": [
+			"./index-web.ts"
+		  ]
+		}
+	},
+
   }
   

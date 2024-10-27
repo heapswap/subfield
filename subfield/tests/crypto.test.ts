@@ -1,4 +1,4 @@
-import * as sf from "../index.ts"
+import * as sf from "../index-web.ts"
 import { expect, test } from "bun:test"
 
 test("hash", async () => {
